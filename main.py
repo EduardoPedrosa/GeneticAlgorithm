@@ -80,7 +80,10 @@ class geneticAlgorithm():
                 nextGeneration.append(child2)
             self.population = nextGeneration
             self.evaluatePopulation()
-        print( 'Resultado: ', self.bestChild(),  )
+
+        bestChild = self.bestChild()
+        print('Melhor filho:', bestChild)
+        print('X máximo:', binaryArrayToInt(bestChild[0], self.quantityOfBits) )
 
 def main():
     # generations = input('Quantidade de gerações: ')
