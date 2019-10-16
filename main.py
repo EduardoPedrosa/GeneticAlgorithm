@@ -67,10 +67,10 @@ class geneticAlgorithm():
         return max(participants, key=lambda participant: participant[1]) #retorna o individuo com a melhor avaliação
 
     def mutation(self, individual):
+        number = binaryArrayToInt(individual, self.quantityOfBits)
         if(random.random() <= self.mutationRate):
-            number = binaryArrayToInt(individual, self.populationSize)
             number = (number * -1)
-            return [int(x) for x in list(binary_repr(number, self.quantityOfBits))] 
+        return [int(x) for x in list(binary_repr(number, self.quantityOfBits))] 
 
     def start(self):
         self.initialPopulation()
@@ -82,8 +82,8 @@ class geneticAlgorithm():
                 father = self.selection()
                 mother = self.selection()
                 child1, child2 = self.crossover(father, mother)
-                chidl1 = self.mutation(child1)
-                chidl2 = self.mutation(child2)
+                child1 = self.mutation(child1)
+                child2 = self.mutation(child2)
                 nextGeneration.append(child1)
                 nextGeneration.append(child2)
             self.population = nextGeneration
@@ -98,7 +98,7 @@ def main():
     interval = [-10, 10] #resultado buscado em inteiro
     generations = 20
     populationSize = 30
-    mutationRate = 1.01
+    mutationRate = 0.01
     crossoverRate = 0.7
 
     ga = geneticAlgorithm(generations, populationSize, mutationRate, crossoverRate, interval)
