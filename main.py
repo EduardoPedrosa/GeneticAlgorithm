@@ -6,13 +6,17 @@ from numpy import binary_repr
 from utils import *
 
 class geneticAlgorithm():
-    def __init__(self, generations, populationSize, mutationRate, crossoverRate, interval):
+    def __init__(self, generations, populationSize, mutationRate, crossoverRate, interval, a, b, c, isMax):
         self.generations = generations
         self.populationSize = populationSize
         self.mutationRate = mutationRate
         self.crossoverRate = crossoverRate
         self.interval = interval
         self.quantityOfBits = math.ceil(math.log((self.interval[1] - self.interval[0]), 2.0))
+        self.a = a
+        self.b = b
+        self.c = c
+        self.isMax = isMax
 
     def initialPopulation(self):
         population = []
@@ -23,7 +27,7 @@ class geneticAlgorithm():
 
     def fitness(self, individual):
         number = binaryArrayToInt(individual, self.quantityOfBits)
-        return ((number*number) - (3*number) + 4)
+        return ((self.a*(number*number)) + (self.b*number) + self.c)
 
     def evaluatePopulation(self):
         self.evaluation = []
@@ -36,10 +40,16 @@ class geneticAlgorithm():
         individual1 = tournamentParticipants[index]
         del tournamentParticipants[index]
         individual2 = tournamentParticipants[random.randint(0, self.populationSize-2)]
-        if(individual1[1] > individual2[1]):
-            return individual1[0]
-        else:
-            return individual2[0]
+        if(self.isMax):
+            if(individual1[1] > individual2[1]):
+                return individual1[0]
+            else:
+                return individual2[0]
+        else :
+            if(individual1[1] < individual2[1]):
+                return individual1[0]
+            else:
+                return individual2[0]
 
     def crossover(self, father, mother):
         child1 = father
@@ -64,7 +74,10 @@ class geneticAlgorithm():
 
     def bestChild(self):
         participants = list(zip(self.population, self.evaluation))
-        return max(participants, key=lambda participant: participant[1]) #retorna o individuo com a melhor avaliação
+        if(self.isMax):
+            return max(participants, key=lambda participant: participant[1]) #retorna o individuo com a melhor avaliação
+        else:
+            return min(participants, key=lambda participant: participant[1]) #retorna o individuo com a melhor avaliação
 
     def mutation(self, individual):
         number = binaryArrayToInt(individual, self.quantityOfBits)
@@ -90,17 +103,46 @@ class geneticAlgorithm():
             self.evaluatePopulation()
 
         bestChild = self.bestChild()
-        print('Melhor filho:', bestChild)
-        print('X máximo:', binaryArrayToInt(bestChild[0], self.quantityOfBits) )
+        print('------------------------------------------------')
+        print('Melhor indivíduo:', bestChild)
+        individual, y = bestChild
+        if(self.isMax):
+            print('X máximo:', binaryArrayToInt(bestChild[0], self.quantityOfBits), '\nY máximo: ', y )
+        else:
+            print('X mínimo:', binaryArrayToInt(bestChild[0], self.quantityOfBits), '\nY mínimo: ', y )
+
 
 def main():
-    # generations = input('Quantidade de gerações: ')
-    interval = [-10, 10] #resultado buscado em inteiro
-    generations = 20
-    populationSize = 30
-    mutationRate = 0.01
-    crossoverRate = 0.7
+    option = input('1) Executar com valores padrões \n2) Executar com valores personalizados\n')
+    isMax = True
+    print('------------------------------------------------')
+    if(option == '1'):
+        interval = [-10, 10] #intervalo de busca
+        generations = 20
+        populationSize = 30
+        mutationRate = 0.01
+        crossoverRate = 0.7
+        a = 1
+        b = -3
+        c = 4
+    else:
+        option2 = input('1)Procurar por ponto máximo \n2)Procurar por ponto mínimo\n')
+        if(option2 == '2'):
+            isMax= False
+        print('Valores padrões entre parenteses:')
+        a = float(input('Valor do "a" da função(1): '))
+        b = float(input('Valor do "b" da função(-3): '))
+        c = float(input('Valor do "c" da função(4): '))
+        generations = int(input('Quantidade de gerações(20): '))
+        intervalMin = int(input('Valor mínimo do intervalo de busca(-10): '))
+        intervalMax = int(input('Valor máximo do intervalo de busca(10): '))
+        interval = [intervalMin, intervalMax]
+        populationSize = int(input('Tamanho da população(30): '))
+        mutationRate = float(input('Taxa de mutação(0.01): '))
+        crossoverRate = float(input('Taxa de crossover(0.7): '))
 
-    ga = geneticAlgorithm(generations, populationSize, mutationRate, crossoverRate, interval)
+    print('------------------------------------------------')
+
+    ga = geneticAlgorithm(generations, populationSize, mutationRate, crossoverRate, interval, a, b, c, isMax)
     ga.start()
 main()
